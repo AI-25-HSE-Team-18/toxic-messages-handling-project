@@ -372,3 +372,6 @@ ML-For-Beginners.Rproj
 .env
 .venv
 venv
+
+# pyproject trash
+***egg-info***
