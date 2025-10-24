@@ -1,0 +1,52 @@
+# install the project by using: pip install . instead of pip install -r requirements.txt
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "T-guard"
+version = "0.0.1"
+description = "Веб-сервис, использующий методы машинного обучения и глубокого обучения для определения токсичности текстовых сообщений." 
+readme = "README.md"
+requires-python = ">=3.9, <3.14"
+
+# authors = [aidmitruk, kondratevaai, obbrnu] # somthng went wrong
+
+# base dependencies, less specific versions: 
+dependencies = [
+    "annotated-types",
+    "attrs", 
+    "cryptography",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "matplotlib",
+    "seaborn",
+    "tqdm",
+    "requests",
+    "psutil",
+    "jupyter_client",
+    "ipykernel",
+    "great_expectations",
+    "wordcloud",
+    "kagglehub",
+    "pip-tools", # for auto-generations of requirements.txt
+    
+    # windows-only dependency deleted, problems did not appear: 
+    # "pywin32; sys_platform == 'win32'"
+]
+
+[project.optional-dependencies] # 
+dev = [ 
+    "pytest",
+    "ipython",
+    "jupyterlab",
+    "debugpy",
+    "black",
+    "isort",
+    "flake8"
+]
+
+[tool.setuptools.packages.find]
+# where = ["src"] # for the future and __init__.py packets
