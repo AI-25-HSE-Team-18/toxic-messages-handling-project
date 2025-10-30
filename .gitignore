@@ -375,3 +375,5 @@ venv
 
 # pyproject trash
 ***egg-info***
+
+eda.ipynb
