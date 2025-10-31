@@ -31,6 +31,8 @@ dependencies = [
     "great_expectations",
     "wordcloud",
     "kagglehub",
+    # "nbdime", # some cool stuff for smarter jupyter notebooks trackding 
+    "pyarrow", # <- to solve pyarrow problem instantly
     "pip-tools", # for auto-generations of requirements.txt
     
     # windows-only dependency deleted, problems did not appear: 
