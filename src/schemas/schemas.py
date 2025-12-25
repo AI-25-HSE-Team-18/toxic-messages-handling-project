@@ -1,10 +1,8 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import AsyncGenerator, List, Optional
-from datetime import datetime, timedelta
+from typing import Optional
+from datetime import datetime
+from domain.models import UserRole
 
-# ==============================================================================
-# PYDANTIC SCHEMAS (API Validation) / PYDANTIC СХЕМЫ (Валидация API)
-# ==============================================================================
 
 class UserBase(BaseModel):
     """
@@ -18,55 +16,42 @@ class UserBase(BaseModel):
     email: str = Field(..., description="User email address")
     age: Optional[int] = Field(None, ge=0, le=150, description="User age")
 
-    
+
 class RequestsBase(BaseModel):
     """
     Base Pydantic schema for user requests (ML inference input)
     Used for validation and serialization in API layer.
     """
-
     text_raw: str = Field(
         ...,
         min_length=1,
+        max_length=5000,
         description="Raw text input sent to the ML model"
     )
 
-class RequestCreate(BaseModel):
-    text_raw: str
 
 class RequestResponse(RequestsBase):
     """
     Schema for returning logged request data
     """
-
     id: int
     user_id: int
     timestamp: datetime
     prediction: int
+    processing_time_ms: Optional[float] = None
+    text_length: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
 
-class UserCreate(UserBase):
-    """
-    Schema for creating a user (input from API request)
-    Схема для создания пользователя (входные данные из API запроса)
 
-    Used in POST /users endpoint
-    Используется в POST /users эндпоинте
+class StatsResponse(BaseModel):
     """
-    pass
-
-
-class UserUpdate(BaseModel):
+    Schema for statistics response
     """
-    Schema for updating a user (all fields optional)
-    Схема для обновления пользователя (все поля необязательные)
-
-    Used in PUT /users/{user_id} endpoint
-    Используется в PUT /users/{user_id} эндпоинте
-    """
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
-    email: Optional[str] = None
-    age: Optional[int] = Field(None, ge=0, le=150)
+    total_requests: int
+    avg_processing_time_ms: float
+    processing_time_quantiles: dict  # mean/50%/95%/99%/min/max/std
+    text_characteristics: dict       # avg_length/min_length/max_length/std_length
+    prediction_distribution: dict    # toxic/non_toxic/toxic_percentage
 
 
 class UserResponse(UserBase):
@@ -81,9 +66,14 @@ class UserResponse(UserBase):
     Используется в GET /users и GET /users/{user_id} эндпоинтах
     """
     id: int
-
-    # Configure Pydantic to work with SQLAlchemy models
-    # Настроить Pydantic для работы с моделями SQLAlchemy
+    role: UserRole
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserRegistrationResponse(BaseModel):
+    """
+    Schema for user registration response with token
+    """
+    user: UserResponse
+    access_token: str
+    token_type: str = "bearer"

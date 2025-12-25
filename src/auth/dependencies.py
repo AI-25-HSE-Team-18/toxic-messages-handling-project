@@ -5,9 +5,10 @@ from sqlalchemy import select
 
 from core.security import decode_access_token
 from database import get_db
-from domain.models import User
+from domain.models import User, UserRole
 
 security = HTTPBearer()
+
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
@@ -16,7 +17,14 @@ async def get_current_user(
     token = credentials.credentials
 
     try:
-        user_id = decode_access_token(token)
+        payload = decode_access_token(token)
+        user_id = int(payload["sub"])
+        user_role = UserRole(payload["role"])
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e)
+        )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,3 +43,14 @@ async def get_current_user(
         )
 
     return user
+
+
+async def get_admin_user(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user

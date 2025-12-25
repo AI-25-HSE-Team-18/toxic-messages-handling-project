@@ -1,8 +1,9 @@
 from sqlalchemy.sql import func
 from datetime import datetime, timedelta
 from typing import AsyncGenerator, List, Optional
-from sqlalchemy import String, Integer, select, delete, TIMESTAMP, ForeignKey
+from sqlalchemy import String, Integer, select, delete, TIMESTAMP, ForeignKey, Enum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+import enum
 
 
 class Base(DeclarativeBase):
@@ -11,6 +12,15 @@ class Base(DeclarativeBase):
     Базовый класс для всех моделей SQLAlchemy
     """
     pass
+
+
+class UserRole(enum.Enum):
+    """
+    User roles enum
+    Возможные роли пользователей
+    """
+    USER = "user"
+    ADMIN = "admin"
 
 
 class User(Base):
@@ -58,8 +68,15 @@ class User(Base):
         nullable=True  # Optional field / Необязательное поле
     )
 
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole),
+        nullable=False,
+        default=UserRole.USER,
+        index=True
+    )
+
     def __repr__(self) -> str:
-        return f"<User(id={self.id}, name={self.name}, email={self.email})>"
+        return f"<User(id={self.id}, name={self.name}, email={self.email}, role={self.role})>"
 
 
 class UserRequests(Base):
@@ -96,6 +113,16 @@ class UserRequests(Base):
     prediction: Mapped[int] = mapped_column(
         nullable=False,
         index=True
+    )
+
+    processing_time_ms: Mapped[Optional[float]] = mapped_column(
+        nullable=True,
+        index=True,
+    )
+
+    text_length: Mapped[Optional[int]] = mapped_column(
+        nullable=True,
+        index=True,
     )
 
     def __repr__(self) -> str:
