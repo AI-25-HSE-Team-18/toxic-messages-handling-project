@@ -11,8 +11,9 @@ from domain.models import Base
 
 
 async def init_db() -> None:
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Таблицы теперь создаются через миграции Alembic
+    # alembic upgrade head
+    pass
 
 
 async def close_db() -> None:
