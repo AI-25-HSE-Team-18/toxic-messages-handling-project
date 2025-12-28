@@ -3,16 +3,9 @@ Model class to predict toxicity type of the messages.
 """
 
 from scipy.sparse import hstack
-from services.text_utils import get_num_features
-from services.preprocessor import Preprocessor, LinearSVMTextPreprocessor
+from services.preprocessor import Preprocessor, PREPROCESSOR_REGISTRY
 from services.utils import load_config, load_local_model, load_local_encoder
 
-
-# NOTE: for preprocessing flexibility, 
-# simply pass it to the config.json: 
-PREPROCESSOR_REGISTRY = {
-    "LinearSVMTextPreprocessor": LinearSVMTextPreprocessor,
-}
 
 class Model: 
     def __init__(self, config_path='config.json'):
@@ -79,26 +72,25 @@ class PickleModel(Model):
         self.text_preprocessor = preprocessor_class()
         
     def preprocess(self, text: str) -> str:
-        # text preprocessing:  
-        text_preprocessed = self.text_preprocessor.preprocess(text)
 
-        return text_preprocessed
-
-    def predict(self, text_preprocessed: str, use_num_features: bool = True) -> int: 
-        """Do prediction based on input sparce matrix"""
+        # preprocess in text domain:  
+        text_preprocessed, numc_features = self.text_preprocessor.preprocess(text)
         
         # encode text: 
-        input_array = self.encoder.transform([text_preprocessed])
-        # print(input_array.shape)
+        encoded_text = self.encoder.transform([text_preprocessed])
 
-        # add numeric features as sparse matrix: 
-        if use_num_features: 
-            num_features = get_num_features(text_preprocessed)
-            # print(num_features.shape)
+        # hstack if has num_features: 
+        if numc_features is not None: 
+            inputs = hstack([encoded_text, numc_features])
+        else: 
+            inputs = encoded_text
 
-            input_array = hstack([input_array, num_features])
-            # print(input_array.shape)
+        return inputs
 
-        pred = self.model_weights.predict(input_array)
+    def predict(self, inputs) -> int: 
+        """Do prediction based on input sparce matrix"""
+        
+        pred = self.model_weights.predict(inputs)
 
-        return int(pred) 
+        # return pred
+        return float(pred[0]) 

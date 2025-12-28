@@ -324,5 +324,8 @@ def map_profanity(
 
     pattern = re.compile(r"\b[А-Яа-яЁё']+\b")
     
-    print(text)
+    # print(text)
     return pattern.sub(repl, text)
+
+def del_punct_tokens(text: str):
+    return re.sub(r'\[(?!(EMJ|EMT|PRF)_\d+)[^\]]*\]', '', text)
