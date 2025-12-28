@@ -28,8 +28,8 @@ async def forward(
     if not request.text_raw:
         raise HTTPException(status_code=400, detail="bad request")
 
-    text = model.preprocess(request.text_raw)
-    prediction = model.predict(text)
+    inputs = model.preprocess(request.text_raw)
+    prediction = model.predict(inputs)
 
     if prediction is None:
         raise HTTPException(
