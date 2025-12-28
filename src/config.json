@@ -1,12 +1,24 @@
 {
     
-    "default_predictor": "LinearSVMBinaryV1",
-    "default_encoder": "TfidfVectorizer_enc",
+    "default_predictor": "best_28_12",
+    "default_encoder": "best_28_12_vec",
 
     "available_predictors": [
         {
+            "predictor_id": "best_28_12",
+            "preprocessor_type": "LinearSVMPreprocessorSI",
+            "library": "sklearn",
+            "predictor_version": "0.0.3",
+            "storage_type": "local",
+            "model_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.86_unf_True_tc_text_save_inform_dws_False.pkl",
+            "input_col_type": "text_save_inform",
+            "classification_type": "binary",
+            "description": "better distinction in classifying interpersonal conflict and healthy criticism",
+            "_hyperparameters": {}
+        },
+        {
             "predictor_id": "LinearSVMBinaryV1",
-            "preprocessor_type": "LinearSVMTextPreprocessor",
+            "preprocessor_type": "LinearSVMPreprocessor",
             "library": "sklearn",
             "predictor_version": "0.0.1",
             "storage_type": "local",
@@ -15,36 +27,25 @@
             "classification_type": "binary",
             "description": "0.86 by f1_macro",
             "_hyperparameters": {}
-        },
-        {
-            "predictor_id": "LinearSVMBinaryV0",
-            "preprocessor_type": "LinearSVMTextPreprocessor",
-            "library": "sklearn",
-            "predictor_version": "0.0.1",
-            "storage_type": "local",
-            "model_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.87_unf_True_tc_text_del_stop_words_dws_False.pkl",
-            "input_col_type": "text_del_stop_words",
-            "classification_type": "binary",
-            "description": "0.87 by f1_macro",
-            "_hyperparameters": {}
         }
+        
     ],
     
     "available_encoders": [
+        {
+            "encoder_id": "best_28_12_vec",
+            "library": "sklearn",
+            "version": "0.0.1",
+            "storage_type": "local",
+            "encoder_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.86_unf_True_tc_text_save_inform_dws_False_vec.pkl",
+            "_parameters": {}
+        },
         {
             "encoder_id": "TfidfVectorizer_enc",
             "library": "sklearn",
             "version": "0.0.1",
             "storage_type": "local",
             "encoder_path": "src/services/data/LinearSVMBinaryV0/vectorizer_encoded_prof.pkl",
-            "_parameters": {}
-        },
-        {
-            "encoder_id": "TfidfVectorizer_del",
-            "library": "sklearn",
-            "version": "0.0.1",
-            "storage_type": "local",
-            "encoder_path": "src/services/data/LinearSVMBinaryV0/vectorizer.pkl",
             "_parameters": {}
         }
     ]

@@ -7,12 +7,16 @@ import pymorphy3 as pymorphy2
 from stop_words import get_stop_words
 import numpy as np
 from pathlib import Path
+
+
+# from services.text_utils import 
 from services.text_utils import map_noninformatives, map_punctuation, \
-                                map_profanity, map_emoji_emoticons, get_num_features
+                                map_profanity, map_emoji_emoticons, del_punct_tokens, get_num_features
 from services.utils import load_loc_enc_json
 
 
 BASE_DIR = Path(__file__).resolve().parent
+
 
 class Preprocessor: 
     def __init__(self): 
@@ -22,7 +26,7 @@ class Preprocessor:
     def preprocess(self, text: str):
         return text  
 
-class LinearSVMTextPreprocessor(Preprocessor):
+class LinearSVMPreprocessor(Preprocessor):
     """Preprocessor especially for LinearSVM model
     Using different text utils from text_utils"""
     
@@ -59,9 +63,18 @@ class LinearSVMTextPreprocessor(Preprocessor):
         self.stop_words = set(get_stop_words('russian'))
 
     def preprocess(self, 
-                   text: str,
-                   del_stop_words=False) -> str: 
-        """Returns preprocessed text"""
+                    text: str,
+                    mapping=True,
+                    del_stop_words=False,
+                    del_punct=True,
+                    use_num_features=True
+                    ) -> str: 
+        
+        """Returns preprocessed text
+        This method is for flexible changing of preprocessing steps.
+        Turn flags on your custom steps in subclasses for faster switches 
+        between the models and their methods.
+        """
         
         mapping_dict = {
             "url": "[URL]",
@@ -72,24 +85,52 @@ class LinearSVMTextPreprocessor(Preprocessor):
             "repeat_punct": "[RPP]",
         }
 
-        # mapping steps from text part of text_domain_features_0.ipynb: 
-        text = map_noninformatives(text, mapping_dict)
-        text = map_emoji_emoticons(text, (self.enc_emoj, self.enc_emot))
-        text = map_punctuation(text, self.enc_rep, self.enc_sep)
-        text = map_profanity(self.morph, text, self.profanities, self.enc_prof)
+        # if not(mapping)
 
-        # delete stop_words: 
-        if del_stop_words:
-            text = ' '.join(word for word in text.split() if word.lower() not in self.stop_words)
+        if mapping:
+            # mapping steps from text part of text_domain_features_0.ipynb: 
+            text = map_noninformatives(text, mapping_dict)
+            text = map_emoji_emoticons(text, (self.enc_emoj, self.enc_emot))
+            text = map_punctuation(text, self.enc_rep, self.enc_sep)
+            text = map_profanity(self.morph, text, self.profanities, self.enc_prof)
 
-        return text
+            # delete stop_words: 
+            if del_stop_words:
+                text = ' '.join(word for word in text.split() if word.lower() not in self.stop_words)
+            
+            if del_punct: 
+                text = del_punct_tokens(text)
 
+        # add numeric features as sparse matrix: 
+        # NOTE: now logic is switched from model.py 
+        if use_num_features: 
+            num_features = get_num_features(text)
+        else: 
+            num_features = None
 
-# class NumericFeaturesPreprocessor(Preprocessor):
-#     def __init__(self):
-#         super().__init__() 
+        return (text, num_features)
 
-#         self.num_sparse = None
+class LinearSVMPreprocessorSI(LinearSVMPreprocessor): 
+    def __init__(self):
+        super().__init__()
 
-#     def preprocess_numeric(self): 
-#         pass 
+    def preprocess(self, text, mapping=True, del_stop_words=False, del_punct=True, use_num_features=True):
+        return super().preprocess(text, mapping, del_stop_words, del_punct, use_num_features)
+    
+class LinearSVMPreprocessorRaw(LinearSVMPreprocessor): 
+    def __init__(self):
+        super().__init__()
+
+    def preprocess(self, text, mapping=False, del_stop_words=False, del_punct=False, use_num_features=True):
+        return super().preprocess(text, mapping, del_stop_words, del_punct, use_num_features)
+    
+
+# NOTE: to use custom preprocessors, please
+# 1. register it here in PREPROCESSOR_REGISTRY
+# 2 pass the str Prepdocessors' name into src/config.json in "preprocessor_type" field
+
+PREPROCESSOR_REGISTRY = {
+    "LinearSVMPreprocessor": LinearSVMPreprocessor,
+    "LinearSVMPreprocessorSI": LinearSVMPreprocessorSI,
+    "LinearSVMPreprocessorRaw": LinearSVMPreprocessorRaw
+}
