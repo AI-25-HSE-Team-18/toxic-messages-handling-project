@@ -369,7 +369,7 @@ MigrationBackup/
 .Rhistory
 ML-For-Beginners.Rproj
 
-.env
+~.env
 .venv
 venv
 
@@ -378,3 +378,5 @@ venv
 
 eda.ipynb
 ***.csv
+
+src/local_requests.db

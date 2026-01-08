@@ -1,0 +1,52 @@
+{
+    
+    "default_predictor": "LinearSVMBinaryV1",
+    "default_encoder": "TfidfVectorizer_enc",
+
+    "available_predictors": [
+        {
+            "predictor_id": "LinearSVMBinaryV1",
+            "preprocessor_type": "LinearSVMTextPreprocessor",
+            "library": "sklearn",
+            "predictor_version": "0.0.1",
+            "storage_type": "local",
+            "model_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.87_unf_True_tc_text_encoded_profanity_dws_False.pkl",
+            "input_col_type": "text_encoded_profanity",
+            "classification_type": "binary",
+            "description": "0.86 by f1_macro",
+            "_hyperparameters": {}
+        },
+        {
+            "predictor_id": "LinearSVMBinaryV0",
+            "preprocessor_type": "LinearSVMTextPreprocessor",
+            "library": "sklearn",
+            "predictor_version": "0.0.1",
+            "storage_type": "local",
+            "model_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.87_unf_True_tc_text_del_stop_words_dws_False.pkl",
+            "input_col_type": "text_del_stop_words",
+            "classification_type": "binary",
+            "description": "0.87 by f1_macro",
+            "_hyperparameters": {}
+        }
+    ],
+    
+    "available_encoders": [
+        {
+            "encoder_id": "TfidfVectorizer_enc",
+            "library": "sklearn",
+            "version": "0.0.1",
+            "storage_type": "local",
+            "encoder_path": "src/services/data/LinearSVMBinaryV0/vectorizer_encoded_prof.pkl",
+            "_parameters": {}
+        },
+        {
+            "encoder_id": "TfidfVectorizer_del",
+            "library": "sklearn",
+            "version": "0.0.1",
+            "storage_type": "local",
+            "encoder_path": "src/services/data/LinearSVMBinaryV0/vectorizer.pkl",
+            "_parameters": {}
+        }
+    ]
+
+}
