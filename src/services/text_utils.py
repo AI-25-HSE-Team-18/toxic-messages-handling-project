@@ -1,15 +1,9 @@
 import html
 import re
 import emoji
-# import pymorphy2
 
-# import kagglehub
 import numpy as np
-import pandas as pd 
-import seaborn as sns 
 from scipy.sparse import csr_matrix
-from tqdm import tqdm
-import matplotlib.pyplot as plt 
 
 
 def get_num_features(text: str) -> csr_matrix: 
