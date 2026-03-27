@@ -7,9 +7,9 @@ from database import get_db
 from domain.models import User, UserRequests
 from schemas.schemas import RequestsBase, RequestResponse
 from auth.dependencies import get_current_user
-from services.model import PickleModel
+from services.model import LinearSVMModel
 
-model = PickleModel()
+model = LinearSVMModel()
 
 router = APIRouter(
     prefix="/forward",
