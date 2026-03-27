@@ -1,53 +1,19 @@
 {
+    "aws_endpoint_url": "", 
+    "aws_access_key_id": "",
+    "aws_secret_access_key": "", 
     
-    "default_predictor": "best_28_12",
-    "default_encoder": "best_28_12_vec",
-
-    "available_predictors": [
+    "predictors": [
         {
             "predictor_id": "best_28_12",
-            "preprocessor_type": "LinearSVMPreprocessorSI",
             "library": "sklearn",
             "predictor_version": "0.0.3",
             "storage_type": "local",
+            "bucket_name": "",
             "model_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.86_unf_True_tc_text_save_inform_dws_False.pkl",
-            "input_col_type": "text_save_inform",
-            "classification_type": "binary",
-            "description": "better distinction in classifying interpersonal conflict and healthy criticism",
-            "_hyperparameters": {}
-        },
-        {
-            "predictor_id": "LinearSVMBinaryV1",
-            "preprocessor_type": "LinearSVMPreprocessor",
-            "library": "sklearn",
-            "predictor_version": "0.0.1",
-            "storage_type": "local",
-            "model_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.87_unf_True_tc_text_encoded_profanity_dws_False.pkl",
-            "input_col_type": "text_encoded_profanity",
-            "classification_type": "binary",
-            "description": "0.86 by f1_macro",
-            "_hyperparameters": {}
-        }
-        
-    ],
-    
-    "available_encoders": [
-        {
-            "encoder_id": "best_28_12_vec",
-            "library": "sklearn",
-            "version": "0.0.1",
-            "storage_type": "local",
             "encoder_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.86_unf_True_tc_text_save_inform_dws_False_vec.pkl",
-            "_parameters": {}
-        },
-        {
-            "encoder_id": "TfidfVectorizer_enc",
-            "library": "sklearn",
-            "version": "0.0.1",
-            "storage_type": "local",
-            "encoder_path": "src/services/data/LinearSVMBinaryV0/vectorizer_encoded_prof.pkl",
-            "_parameters": {}
+            "classification_type": "binary",
+            "description": "better distinction in classifying interpersonal conflict and healthy criticism"
         }
     ]
-
 }
