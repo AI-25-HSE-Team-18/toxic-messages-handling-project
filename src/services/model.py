@@ -2,76 +2,114 @@
 Model class to predict toxicity type of the messages. 
 """
 
+from abc import ABC, abstractmethod
+from typing import Any
 from scipy.sparse import hstack
-from services.preprocessor import Preprocessor, PREPROCESSOR_REGISTRY
-from services.utils import load_config, load_local_model, load_local_encoder
+import logging
+
+from services.text_preprocessor import (LinearSVMPreprocessor, 
+                                   LinearSVMPreprocessorSI, 
+                                   LinearSVMPreprocessorRaw)
+
+# from services.preprocessor import Preprocessor, PREPROCESSOR_REGISTRY
+from services.text_preprocessor import TextPreprocessor
+from core.config import MODEL_CONFIG
+from services.utils import load_config, load_pickle, load_local_encoder, load_encoder
+
+logger = logging.getLogger(__name__)
 
 
 class Model: 
-    def __init__(self, config_path='config.json'):
+    def __init__(self, config_path=MODEL_CONFIG, worker_id=0):
+        self.worker_id = worker_id
         self.config_path = config_path
         self.config_model = None
-        self.config_encoder = None
-
-        # usable objects (model weights, encoder object): 
-        self.model_weights = None # model weights is using predict() method 
-        self.encoder = None
-
-        # current model, encoder info: 
-        self.predictor_id = None
-        self.encoder_id = None
-
-        # pass preprocessor: 
-        self.text_preprocessor = None
-
-class PickleModel(Model):
-    def __init__(self, config_path='config.json'):
-        super().__init__(config_path)
         
         # load passed config: 
-        self.init_config()
-        # load model, encoder objects: 
-        self.load_models()
+        self._set_config()
+        self._load_weights()
+        self._load_optional_encoder()
 
-    def init_config(self): 
+    def _set_config(self): 
         """Select current model and encoders from the config"""
 
         base_config = load_config(self.config_path)
-        
-        # get defaults and set up the current values: 
-        default_predictor = base_config.get("default_predictor")
-        default_encoder = base_config.get("default_encoder")
-        
-        config_model: dict = [conf for conf in base_config.get("available_predictors") 
-                        if conf.get("predictor_id")==default_predictor][0]
-        config_encoder: dict = [conf for conf in base_config.get("available_encoders") 
-                        if conf.get("encoder_id")==default_encoder][0]
-        
+
+        # Find the predictor config in available_predictors
+        # by using current worker id 
+        # (worker id is for multiprocessing, for the future):
+        config_model: dict = [conf for conf in base_config.get("predictors")][self.worker_id]
+
         self.config_model = config_model
-        self.config_encoder = config_encoder
-        self.predictor_id = default_predictor
-        self.encoder_id = base_config.get("default_encoder")
         self.storage_type = config_model.get("storage_type")
 
-    def load_models(self):
-        if self.storage_type == "local":
-            # load model: 
-            self.model_weights = load_local_model(self.config_model.get("model_path"))
-            # load encoder: 
-            self.encoder = load_local_encoder(self.config_encoder.get("encoder_path"))
-        else:
-            raise NotImplementedError(
-                f"Storage type '{self.storage_type}' is not implemented yet"
-                )
+    def _load_weights(self):
+        """Loading weights and encoders if passed"""
+
+        self._model_path = self.config_model.get("model_path")
+
+        if self._model_path.endswith(".pkl"):
+            self._model_weights = load_pickle(self.config_model)
+        else: 
+            self.load_custom_weights()
+    
+    def _load_optional_encoder(self): 
+        """Method to load encoder if passed in config, otherwise set to None"""
+
+        if self.config_model.get("encoder_path") is not None:
+            self.encoder = load_encoder(config=self.config_model)
+        else: 
+            self.encoder = None
+
+    @abstractmethod 
+    def load_custom_weights(self):
+        """Method to load any of non-pickle models, e.g. from torch, tensorflow, etc."""
         
-        # instance preprocessor class and load its data: 
-        # strange but.. it works: 
-        preprocessor_class: Preprocessor = PREPROCESSOR_REGISTRY.get(
-                self.config_model.get("preprocessor_type")
+        pass
+
+    @abstractmethod
+    def preprocess(self, text: str) -> Any:
+        """
+        Must return model input array, e.g. sparse matrix for classic ml models,
+        tensor for deep learning models, etc."""
+        pass
+
+    @abstractmethod
+    def predict(self, inputs):
+        """Do prediction based on input and return pred"""
+        pass
+
+
+class LinearSVMModel(Model):
+    """Pickle model assuming use of encoder and different types of preprocessors"""
+    
+    def __init__(self, 
+                 config_path=MODEL_CONFIG, 
+                 worker_id=0,
+                 preprocessor_type="LinearSVMPreprocessorSI"
+                 ):
+        super().__init__(config_path, worker_id)
+
+        # text preprocessor is additional for LinearSVM 
+        # it composes lexical features: 
+        self.text_preprocessor = None
+
+        # dict for classic ml models only,
+        # for different combinations switching in preprocess() method:
+        self.PREPROCESSOR_REGISTRY = {
+            "LinearSVMPreprocessor": LinearSVMPreprocessor,
+            "LinearSVMPreprocessorSI": LinearSVMPreprocessorSI,
+            "LinearSVMPreprocessorRaw": LinearSVMPreprocessorRaw
+        }
+        
+        # instance preprocessor class and load its data from config: 
+        preprocessor_class: TextPreprocessor = self.PREPROCESSOR_REGISTRY.get(
+                preprocessor_type
             )
-        self.text_preprocessor = preprocessor_class()
-        
-    def preprocess(self, text: str) -> str:
+        self.text_preprocessor = preprocessor_class(config=self.config_model)
+
+    def preprocess(self, text: str):
+        """The main preprocessor logic to compose input modelarrays"""
 
         # preprocess in text domain:  
         text_preprocessed, numc_features = self.text_preprocessor.preprocess(text)
@@ -90,7 +128,7 @@ class PickleModel(Model):
     def predict(self, inputs) -> int: 
         """Do prediction based on input sparce matrix"""
         
-        pred = self.model_weights.predict(inputs)
+        pred = self._model_weights.predict(inputs)
 
         # return pred
         return float(pred[0]) 
