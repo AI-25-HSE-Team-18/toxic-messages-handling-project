@@ -5,15 +5,12 @@
     
     "predictors": [
         {
-            "predictor_id": "best_28_12",
-            "library": "sklearn",
-            "predictor_version": "0.0.3",
             "storage_type": "local",
             "bucket_name": "",
             "model_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.86_unf_True_tc_text_save_inform_dws_False.pkl",
             "encoder_path": "src/services/data/LinearSVMBinaryV0/Linear_SVC_macf1_0.86_unf_True_tc_text_save_inform_dws_False_vec.pkl",
-            "classification_type": "binary",
-            "description": "better distinction in classifying interpersonal conflict and healthy criticism"
+            "additional_data_path": "src/services/data/LinearSVMBinaryV0/", 
+            "description": "28.12.25 sklearn binary version 0.0.3"
         }
     ]
 }
