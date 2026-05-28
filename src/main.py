@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from database import init_db, close_db
-from routers import users, forward, requests
+from routers import users, forward, requests, monitoring
 
 
 # ==============================================================================
@@ -32,6 +33,15 @@ app = FastAPI(
 app.include_router(users.router)     
 app.include_router(forward.router)   
 app.include_router(requests.router)   
+app.include_router(monitoring.router)
+
+# Prometheus metrics at /metrics
+Instrumentator().instrument(app).expose(app)
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 
 @app.get("/")

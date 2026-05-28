@@ -27,19 +27,16 @@ dependencies = [\n\
     "fastapi", "uvicorn", "sqlalchemy", "alembic", "psycopg2-binary",\n\
     "boto3", "scikit-learn", "numpy", "pandas", "scipy",\n\
     "aiosqlite", "nltk", "pymorphy3", "tqdm", "PyJWT", "dotenv",\n\
-    "phik", "pillow", "PyYAML", "stop-words", "emoji"\n\
+    "phik", "pillow", "PyYAML", "stop-words", "emoji",\n\
+    "prometheus-fastapi-instrumentator"\n\
 ]' > pyproject.toml
 # COPY pyproject.toml ./ # 1.6 Gb vs 1 Gb as total
 
 RUN pip install --no-cache-dir -e .
 
 WORKDIR /app/src
-# Run migrations
-RUN alembic upgrade head
-RUN cd ..
 
-# Expose port
 EXPOSE 8000
 
-# Start FastAPI service
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# run alembic migration then launch uvicorn
+CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"]
