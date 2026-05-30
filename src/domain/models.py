@@ -115,6 +115,18 @@ class UserRequests(Base):
         index=True
     )
 
+    prediction_label: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        nullable=True,
+        index=True,
+    )
+
+    model_id: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        index=True,
+    )
+
     processing_time_ms: Mapped[Optional[float]] = mapped_column(
         nullable=True,
         index=True,

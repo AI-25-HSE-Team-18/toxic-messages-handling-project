@@ -25,6 +25,7 @@ class RecentPredictionResponse(BaseModel):
     text_raw: str
     prediction: int
     prediction_label: str
+    model_id: Optional[str]
     processing_time_ms: Optional[float]
     text_length: Optional[int]
     source: str
@@ -54,7 +55,10 @@ async def get_recent_predictions(
             timestamp=req.timestamp,
             text_raw=req.text_raw[:200],
             prediction=req.prediction,
-            prediction_label="toxic" if req.prediction == 1 else "non_toxic",
+            prediction_label=req.prediction_label or (
+                "toxic" if req.prediction == 1 else "non_toxic"
+            ),
+            model_id=req.model_id,
             processing_time_ms=req.processing_time_ms,
             text_length=req.text_length,
             source=user_name,

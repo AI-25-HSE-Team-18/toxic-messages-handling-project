@@ -4,6 +4,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 from database import init_db, close_db
 from routers import users, forward, requests, monitoring
+from services.model_registry import ModelRegistry
 
 
 # ==============================================================================
@@ -13,6 +14,7 @@ from routers import users, forward, requests, monitoring
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    app.state.registry = ModelRegistry()
 
     yield
 
