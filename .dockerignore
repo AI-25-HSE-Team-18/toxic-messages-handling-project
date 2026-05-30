@@ -1,0 +1,57 @@
+# Python bytecode
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/*.egg-info/
+**/.eggs/
+**/dist/
+**/build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter / notebook artefacts
+**/.ipynb_checkpoints/
+**/*.ipynb
+
+# Large experiment / model directories (not needed for inference)
+exp_binary/
+multi_files/
+binary_files/
+**/models/
+**/vectorizers/
+
+# Test & temp data
+**/*.csv
+temp-data/
+
+# MLflow / experiment tracking
+mlflow.db
+mlruns/
+
+# Local database (recreated by alembic at container startup)
+*.db
+**/*.db
+*.sqlite
+*.sqlite3
+
+# Development tooling
+.git/
+.gitignore
+*.zip
+
+**/*.jsonl
+
+# Docs & misc
+README.md
+howto-run-inference.md
+notes.txt
+notebooks/
+
+# Requirements files (pyproject.toml is generated inside the image)
+requirements.txt
+requirements_new.txt
+pyproject.toml

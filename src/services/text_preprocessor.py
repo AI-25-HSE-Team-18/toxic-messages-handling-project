@@ -138,4 +138,16 @@ class LinearSVMPreprocessorRaw(LinearSVMPreprocessor):
 
     def preprocess(self, text, mapping=False, del_stop_words=False, del_punct=False, use_num_features=True):
         return super().preprocess(text, mapping, del_stop_words, del_punct, use_num_features)
+
+class BertPreprocessor(TextPreprocessor):
+    """Basic preprocessor for BERT.
+    Does not include any specific steps because 
+    BERT handles the raw data at the train step. 
+    """
+    def __init__(self, config: dict):
+        super().__init__()
+
+    def preprocess(self, text: str) -> str:
+        # Return cleaned text as-is; tokenization logic lives in the tokenizer
+        return text.strip()
     
