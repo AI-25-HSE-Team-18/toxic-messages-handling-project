@@ -7,9 +7,9 @@ from database import get_db
 from domain.models import User, UserRequests
 from schemas.schemas import RequestsBase, RequestResponse
 from auth.dependencies import get_current_user
-from services.model import PickleModel
+from services.model import LinearSVMModel
 
-model = PickleModel()
+model = LinearSVMModel()
 
 router = APIRouter(
     prefix="/forward",
@@ -28,8 +28,8 @@ async def forward(
     if not request.text_raw:
         raise HTTPException(status_code=400, detail="bad request")
 
-    text = model.preprocess(request.text_raw)
-    prediction = model.predict(text)
+    inputs = model.preprocess(request.text_raw)
+    prediction = model.predict(inputs)
 
     if prediction is None:
         raise HTTPException(

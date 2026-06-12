@@ -1,15 +1,9 @@
 import html
 import re
 import emoji
-# import pymorphy2
 
-# import kagglehub
 import numpy as np
-import pandas as pd 
-import seaborn as sns 
 from scipy.sparse import csr_matrix
-from tqdm import tqdm
-import matplotlib.pyplot as plt 
 
 
 def get_num_features(text: str) -> csr_matrix: 
@@ -324,5 +318,8 @@ def map_profanity(
 
     pattern = re.compile(r"\b[А-Яа-яЁё']+\b")
     
-    print(text)
+    # print(text)
     return pattern.sub(repl, text)
+
+def del_punct_tokens(text: str):
+    return re.sub(r'\[(?!(EMJ|EMT|PRF)_\d+)[^\]]*\]', '', text)

@@ -380,3 +380,7 @@ eda.ipynb
 ***.csv
 
 src/local_requests.db
+
+build
+config_s3.json
+config.json
