@@ -38,6 +38,8 @@ class RequestResponse(RequestsBase):
     user_id: int
     timestamp: datetime
     prediction: int
+    prediction_label: Optional[str] = None
+    model_id: Optional[str] = None
     processing_time_ms: Optional[float] = None
     text_length: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)

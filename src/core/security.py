@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
 import jwt
-from core.config import SECRET_KEY, ALGORITHM
+from core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from domain.models import UserRole
 
 def create_access_token(user_id: int, user_role: UserRole) -> str:
     payload = {
         "sub": str(user_id),
         "role": user_role.value,
-        "exp": datetime.utcnow() + timedelta(minutes=60)
+        "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     }
 
     if not SECRET_KEY:

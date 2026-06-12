@@ -1,15 +1,12 @@
-import time
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from domain.models import User, UserRequests
 from schemas.schemas import RequestsBase, RequestResponse
 from auth.dependencies import get_current_user
-from services.model import LinearSVMModel
-
-model = LinearSVMModel()
 
 router = APIRouter(
     prefix="/forward",
@@ -17,39 +14,41 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=RequestResponse)
+@router.post("", response_model=List[RequestResponse])
 async def forward(
-    request: RequestsBase,
+    request: Request,
+    body: RequestsBase,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    start_time = time.perf_counter()
-    
-    if not request.text_raw:
+    """
+    Run all configured models in parallel for the submitted text.
+    Parallel execution and Prometheus metrics are handled inside the service layer.
+    """
+    if not body.text_raw:
         raise HTTPException(status_code=400, detail="bad request")
 
-    inputs = model.preprocess(request.text_raw)
-    prediction = model.predict(inputs)
+    registry = request.app.state.registry
+    results = await registry.run_all(body.text_raw)
 
-    if prediction is None:
-        raise HTTPException(
-            status_code=403,
-            detail="модель не смогла обработать данные"
-        )
-    
-    end_time = time.perf_counter()
-    processing_time_ms = (end_time - start_time) * 1000
+    if not results:
+        raise HTTPException(status_code=503, detail="no models available")
 
-    db_request = UserRequests(
-        user_id=current_user.id,
-        text_raw=request.text_raw,
-        prediction=prediction,
-        processing_time_ms=processing_time_ms,
-        text_length=len(request.text_raw)
-    )
+    db_rows: List[UserRequests] = []
+    for model_id, pred_int, pred_label, processing_time_ms in results:
+        db_rows.append(UserRequests(
+            user_id=current_user.id,
+            text_raw=body.text_raw,
+            prediction=pred_int,
+            prediction_label=pred_label,
+            model_id=model_id,
+            processing_time_ms=processing_time_ms,
+            text_length=len(body.text_raw),
+        ))
 
-    db.add(db_request)
+    db.add_all(db_rows)
     await db.commit()
-    await db.refresh(db_request)
+    for row in db_rows:
+        await db.refresh(row)
 
-    return db_request
+    return db_rows
